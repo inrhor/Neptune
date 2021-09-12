@@ -1,5 +1,6 @@
 package cn.inrhor.neptune.api
 
+import cn.inrhor.neptune.Neptune
 import cn.inrhor.neptune.core.manager.HumanManager
 import fr.xephi.authme.api.v3.AuthMeApi
 import ink.ptms.adyeshach.api.AdyeshachAPI
@@ -16,13 +17,9 @@ import taboolib.platform.util.toBukkitLocation
 
 class EntitySpawner(val player: Player) {
 
-    val manager = AdyeshachAPI.getEntityManagerPrivate(player)
-
     var adyHuman: AdyHuman? = null
 
     var hologram: Hologram<*>? = null
-
-    var password = ""
 
     var content = console().asLangText("ENTER-PASSWORD")
 
@@ -30,12 +27,14 @@ class EntitySpawner(val player: Player) {
         val l = player.location
         val loc = Location(l.world?.name, l.x, l.y, l.z)
         val refLoc = loc
-            .referTo(loc.yaw, 0F, 2.0, 0.0)
+            .referTo(loc.yaw, 0F,
+                Neptune.config.getDouble("login.distance"),
+                0.0)
             .toBukkitLocation()
         if (adyHuman != null) {
             adyHuman?.teleport(refLoc)
         }else {
-            adyHuman = manager.create(EntityTypes.PLAYER, refLoc) as AdyHuman
+            adyHuman = AdyeshachAPI.getEntityManagerPrivate(player).create(EntityTypes.PLAYER, refLoc) as AdyHuman
         }
         val name = player.name
         adyHuman?.setName(name)
@@ -52,7 +51,7 @@ class EntitySpawner(val player: Player) {
         createHologram(refLoc.clone().add(0.0, 2.0, 0.0), mutableListOf("${content}$m".colored()))
 
         var float = 0F
-        submit(async = true, period = 1) {
+        submit(async = true, period = Neptune.config.getLong("login.speed")) {
             if (!player.isOnline) {
                 remove()
                 cancel(); return@submit
@@ -63,7 +62,7 @@ class EntitySpawner(val player: Player) {
             float += 10F
             adyHuman?.controllerLook(float, 0F)
         }
-        submit(async = true, period = 10) {
+        submit(async = true, period = 5) {
             if (!player.isOnline) {
                 cancel(); return@submit
             }
@@ -81,7 +80,6 @@ class EntitySpawner(val player: Player) {
     }
 
     fun remove() {
-        password = ""
         adyHuman?.delete()
         hologram?.delete()
         HumanManager.humanList.remove(player)

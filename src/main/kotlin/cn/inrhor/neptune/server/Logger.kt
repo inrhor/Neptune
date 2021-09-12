@@ -2,6 +2,8 @@ package cn.inrhor.neptune.server
 
 import cn.inrhor.neptune.Neptune
 import taboolib.common.platform.function.console
+import taboolib.common.platform.function.info
+import taboolib.module.chat.colored
 
 /**
  * 信息输出
@@ -9,7 +11,7 @@ import taboolib.common.platform.function.console
 object Logger {
 
     private fun logoSend() {
-        listOf("\n" +
+        info("&3\n" +
                 " _   _            _                    \n" +
                 "| \\ | |          | |                   \n" +
                 "|  \\| | ___ _ __ | |_ _   _ _ __   ___ \n" +
@@ -17,9 +19,7 @@ object Logger {
                 "| |\\  |  __/ |_) | |_| |_| | | | |  __/\n" +
                 "\\_| \\_/\\___| .__/ \\__|\\__,_|_| |_|\\___|\n" +
                 "           | |                         \n" +
-                "           |_|                         \n").forEach {
-            console().sendMessage(it)
-        }
+                "           |_|                         \n".colored())
     }
 
     fun loadInfo() {

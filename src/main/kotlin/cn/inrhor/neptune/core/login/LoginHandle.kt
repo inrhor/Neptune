@@ -12,6 +12,8 @@ import taboolib.platform.util.asLangText
 
 object LoginHandle {
 
+    private val passMap = mutableMapOf<String, String>()
+
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun join(ev: PlayerJoinEvent) {
         val p = ev.player
@@ -26,8 +28,8 @@ object LoginHandle {
         if (AuthMeApi.getInstance().isAuthenticated(p)) return
         val password = ev.message
         val spawner = HumanManager.humanList[p]?: return
-        spawner.password = password
-        spawner.content = "&6&l点击确认密码： &f$password&l"
+        passMap[p.name] = password
+        spawner.content = p.asLangText("CONFIRM-PASSWORD", password)
     }
 
     @SubscribeEvent
@@ -40,6 +42,7 @@ object LoginHandle {
 
     @SubscribeEvent
     fun quit(ev: PlayerQuitEvent) {
+        passMap.remove(ev.player.name)
         HumanManager.remove(ev.player)
     }
 
@@ -49,8 +52,8 @@ object LoginHandle {
         val am = AuthMeApi.getInstance()
         if (am.isAuthenticated(p)) return
         val spawner = HumanManager.humanList[p]?: return
-        val password = spawner.password
         val name = p.name
+        val password = passMap[name]?: return
         if (am.isRegistered(name)) {
             if (am.checkPassword(name, password)) {
                 am.forceLogin(p)
@@ -60,6 +63,7 @@ object LoginHandle {
             return
         }
         am.forceRegister(p, password)
+        passMap.remove(name)
     }
 
 }

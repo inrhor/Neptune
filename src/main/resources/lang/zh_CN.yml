@@ -1,2 +1,5 @@
 ENTER-PASSWORD: "&c&l请在聊天框直接输入密码&f&l"
 WRONG-PASSWORD: "&c&l密码错误，请重新在聊天框输入密码&f&l"
+CONFIRM-PASSWORD: "&6&l点击确认密码： &f{0}&l"
+
+COMMAND-SUCCESSFUL-RELOAD: "&7&l[ &c&li &7&l]&f 已重载 &3&lQuestEngine &f配置文件"
