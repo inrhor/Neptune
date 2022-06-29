@@ -4,6 +4,9 @@ import taboolib.common.platform.Platform
 import taboolib.common.platform.function.pluginVersion
 import taboolib.module.metrics.Metrics
 
+/**
+ * 数据统计
+ */
 object Metrics {
 
     private val bStats by lazy {

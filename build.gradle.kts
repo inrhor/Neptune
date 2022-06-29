@@ -1,7 +1,8 @@
 plugins {
-    java
-    id("io.izzel.taboolib") version "1.26"
-    id("org.jetbrains.kotlin.jvm") version "1.5.20"
+    `java-library`
+    `maven-publish`
+    id("io.izzel.taboolib") version "1.40"
+    id("org.jetbrains.kotlin.jvm") version "1.5.31"
 }
 
 taboolib {
@@ -21,12 +22,12 @@ taboolib {
         }
         dependencies {
             name("Adyeshach")
-            name("AuthMe")
+            name("AuthMe").optional(true)
         }
         prefix("Neptune")
     }
     classifier = null
-    version = "6.0.1-8"
+    version = "6.0.9-4"
 }
 
 repositories {
@@ -36,19 +37,41 @@ repositories {
 }
 
 dependencies {
+    compileOnly("ink.ptms.core:v11900:11900-minimize:mapped")
     compileOnly("ink.ptms.core:v11701:11701:mapped")
     compileOnly("ink.ptms.core:v11701:11701:universal")
-    compileOnly("ink.ptms.core:v11604:11604:all")
-    compileOnly("ink.ptms.core:v11600:11600:all")
-    compileOnly("ink.ptms.core:v11500:11500:all")
-    compileOnly("ink.ptms.core:v11400:11400:all")
-    compileOnly("ink.ptms.core:v11300:11300:all")
-    compileOnly("ink.ptms.core:v11200:11200:all")
-    compileOnly("ink.ptms.core:v11100:11100:all")
-    compileOnly("ink.ptms.core:v11000:11000:all")
-    compileOnly("ink.ptms.core:v10900:10900:all")
-    compileOnly("ink.ptms:Adyeshach:1.3.13")
+    compileOnly("ink.ptms:Adyeshach:1.4.21")
     compileOnly("fr.xephi:authme:5.6.0-SNAPSHOT")
     compileOnly(kotlin("stdlib"))
     compileOnly(fileTree("libs"))
+}
+
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+}
+
+configure<JavaPluginConvention> {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+publishing {
+    repositories {
+        maven {
+            url = uri("https://repo.tabooproject.org/repository/releases")
+            credentials {
+                username = project.findProperty("taboolibUsername").toString()
+                password = project.findProperty("taboolibPassword").toString()
+            }
+            authentication {
+                create<BasicAuthentication>("basic")
+            }
+        }
+    }
+    publications {
+        create<MavenPublication>("library") {
+            from(components["java"])
+            groupId = project.group.toString()
+        }
+    }
 }

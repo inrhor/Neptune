@@ -10,7 +10,7 @@ import taboolib.platform.BukkitPlugin
  * 入口
  */
 object Neptune : Plugin() {
-    @Config(migrate = true)
+    @Config(migrate = true, autoReload = true)
     lateinit var config: SecuredFile
         private set
 

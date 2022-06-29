@@ -1,6 +1,12 @@
 # 登录模块
 login:
+  enable: true
   # 人物距离
   distance: 2.0
   # 旋转速度，越大越慢
   speed: 1
+
+# 库存模块
+inventory:
+  # 是否启用
+  enable: true

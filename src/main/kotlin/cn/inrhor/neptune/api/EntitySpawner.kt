@@ -2,6 +2,7 @@ package cn.inrhor.neptune.api
 
 import cn.inrhor.neptune.Neptune
 import cn.inrhor.neptune.core.manager.HumanManager
+import cn.inrhor.neptune.server.PluginLoader.settings
 import fr.xephi.authme.api.v3.AuthMeApi
 import ink.ptms.adyeshach.api.AdyeshachAPI
 import ink.ptms.adyeshach.api.Hologram
@@ -15,20 +16,22 @@ import taboolib.module.chat.colored
 import taboolib.module.lang.asLangText
 import taboolib.platform.util.toBukkitLocation
 
+/**
+ * 人物生成器
+ */
 class EntitySpawner(val player: Player) {
 
     var adyHuman: AdyHuman? = null
 
     var hologram: Hologram<*>? = null
 
-    var content = console().asLangText("ENTER-PASSWORD")
+    var contentLogin = console().asLangText("ENTER-PASSWORD")
 
-    fun spawn() {
-        val l = player.location
-        val loc = Location(l.world?.name, l.x, l.y, l.z)
+    fun spawn(playerLocation: Location, distance: Double = 0.0, humanType: HumanManager.HumanType = HumanManager.HumanType.NONE) {
+        val loc = Location(playerLocation.world, playerLocation.x, playerLocation.y, playerLocation.z)
         val refLoc = loc
             .referTo(loc.yaw, 0F,
-                Neptune.config.getDouble("login.distance"),
+                distance,
                 0.0)
             .toBukkitLocation()
         if (adyHuman != null) {
@@ -38,43 +41,39 @@ class EntitySpawner(val player: Player) {
         }
         val name = player.name
         adyHuman?.setName(name)
-        submit(async = true) {
-            val skin = SkinValue(name)
-            val texture = skin.texture
-            val signature = skin.signature
-            if (texture != null && signature != null) {
-                adyHuman?.setTexture(texture, signature)
-            }
-        }
+        adyHuman?.setTexture(name)
 
-        var m = "_"
-        createHologram(refLoc.clone().add(0.0, 2.0, 0.0), mutableListOf("${content}$m".colored()))
+        if (humanType == HumanManager.HumanType.LOGIN) {
 
-        var float = 0F
-        submit(async = true, period = Neptune.config.getLong("login.speed")) {
-            if (!player.isOnline) {
-                remove()
-                cancel(); return@submit
+            var m = "_"
+            createHologram(refLoc.clone().add(0.0, 2.0, 0.0), mutableListOf("${contentLogin}$m".colored()))
+
+            var float = 0F
+            submit(async = true, period = settings.login.speed) {
+                if (!player.isOnline) {
+                    remove()
+                    cancel(); return@submit
+                }
+                if (adyHuman == null) {
+                    cancel(); return@submit
+                }
+                float += 10F
+                adyHuman?.controllerLook(float, 0F)
             }
-            if (adyHuman == null) {
-                cancel(); return@submit
+            submit(async = true, period = 5) {
+                if (!player.isOnline) {
+                    cancel(); return@submit
+                }
+                m = if (m == "_") " " else "_"
+                updateHologram(mutableListOf("${contentLogin}$m".colored()))
             }
-            float += 10F
-            adyHuman?.controllerLook(float, 0F)
-        }
-        submit(async = true, period = 5) {
-            if (!player.isOnline) {
-                cancel(); return@submit
-            }
-            m = if (m == "_")  " " else "_"
-            updateHologram(mutableListOf("${content}$m".colored()))
-        }
-        submit(period = 5) {
-            if (AuthMeApi.getInstance().isAuthenticated(player)) {
-                cancel(); return@submit
-            }
-            if (player.location != loc) {
-                player.teleport(loc.toBukkitLocation())
+            submit(period = 5) {
+                if (AuthMeApi.getInstance().isAuthenticated(player)) {
+                    cancel(); return@submit
+                }
+                if (player.location != loc) {
+                    player.teleport(loc.toBukkitLocation())
+                }
             }
         }
     }
